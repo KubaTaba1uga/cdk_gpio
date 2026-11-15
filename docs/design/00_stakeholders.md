@@ -1,26 +1,30 @@
 Stakeholders
 =================
 
-The following fours stakeholder have been identified:
-- IT8951 driver developers (STAKE-00)
+This document identifies the stakeholders of the **CDK: GPIO** project, their expectations, and the needs, goals, and objectives that guide its development.
 
-# IT8951 driver developers
+The following stakeholder have been identified:
+- IT8951 driver developers, we need this lib to allow testing the driver on multiple boards.
 
-**ID**: STAKE-00
+## IT8951 driver developers
 
-## Excpectations
+**ID**: <a id="STAKE-IT8951"></a>STAKE-IT8951
 
 The IT8951 driver needs to work across multiple boards, like raspberry pi or seed studio odyssey
-without recompiling the source code.
+without changing the source code.
 
 | ID     | Expectation                                                      |
 | ------ | ---------------------------------------------------------------- |
 | EXP-00 | Do not need to change src code of driver to change GPIO mapping. |
 | EXP-01 | Use GPIO in easy way.                                            |
 
-## Change GPIO mapping without recompilation
+## Goals and objectives
 
-Goal: Provide a mechanism of changing GPIO mapping without recompiling sources.
+We specify goals and objectives based on the stakeholder excpectation.
+
+### Change GPIO mapping without changing sources
+
+Provide a mechanism of changing GPIO mapping without changing sources.
 
 | ID     | Objective                                        |
 | ------ | ------------------------------------------------ |
@@ -29,14 +33,14 @@ Goal: Provide a mechanism of changing GPIO mapping without recompiling sources.
 | OBJ-02 | Dev can change GPIO pull-up and pull-down.       |
 | OBJ-03 | If no mapping provided default is used.          |
 
-## Use GPIO in easy way
+### Use GPIO in easy way
 
-Goal: Provide simple API to use GPIO.
+Provide simple API to use GPIO.
 
 | ID     | Objective                                        |
 | ------ | ------------------------------------------------ |
 | OBJ-04 | Dev can configure direction (input/output).      |
-| OBJ-01 | Dev can use multiple pins from one bank.         |
-| OBJ-01 | Dev can use multiple pins from multiple banks.   |
-| OBJ-02 | Dev can write to output GPIO.                    |
-| OBJ-03 | Dev can read from input GPIO.                    |
+| OBJ-05 | Dev can use multiple pins from one bank.         |
+| OBJ-06 | Dev can use multiple pins from multiple banks.   |
+| OBJ-07 | Dev can write to output GPIO.                    |
+| OBJ-08 | Dev can read from input GPIO.                    |

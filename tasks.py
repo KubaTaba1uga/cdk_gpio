@@ -23,7 +23,10 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 SRC_PATH = os.path.join(ROOT_PATH, "src")
 BUILD_PATH = os.path.join(ROOT_PATH, "build")
 TEST_PATH = os.path.join(ROOT_PATH, "test")
+DOCS_PATH = os.path.join(ROOT_PATH, "docs")
 
+os.environ["PATH"] = f"{os.path.join(ROOT_PATH, '.venv', 'bin')}:{os.environ['PATH']}"
+os.chdir(ROOT_PATH)
 
 @task
 def install(c):
@@ -180,36 +183,82 @@ def clean(c, extra=""):
                 print(f"Removed directory {path}")
 
     _pr_info("Clean up completed.")
-
+    
 @task
-def deb(c):
-    """ Build deb package.
-    """
-    current_revision = 1
-    version_re = re.compile(r"version : '(\S+)'")
-    version_value = None
-    description_re = re.compile(r"project_description = '(.+)'")
-    description_value = None
-    
-    with open("meson.build") as fp:
-        meson = fp.readlines()
+def docs_build(c):
+    _pr_info("Building docs...")
 
+    docs_path = os.path.join(BUILD_PATH, "docs", "html")
+    assets_paths = _find_docs_assets(os.path.join(ROOT_PATH, "docs"))
+    drawio_paths = [path for path in assets_paths if path.endswith(".drawio")]
     
-    for line in meson:
-        version_match = version_re.search(line)
-        
-        if version_match:
-            version_value = version_match[1]
+    for drawio_path in drawio_paths:
+        print(f"{drawio_path=}")
+        do_loop, i = True, 1
+        while do_loop:
+            res = c.run(f"bash tools/gen_diagram.sh {drawio_path} {i}", warn=True)
+            if not res.ok:
+                do_loop = False
+            i += 1
             
-        description_match = description_re.search(line)
-        
-        if description_match:
-            description_value = description_match[1]
+    try:
+        c.run("doxygen docs/Doxyfile")
+        with c.cd(DOCS_PATH):
+            c.run(f"sphinx-build -b html . {docs_path}")
+    except Exception:
+        _pr_error(f"Building docs failed")
+        raise
 
-    if not version_value or not description_value:
-        raise ValueError(f"No version or description: {version_value=} {description_value=}")
+    _pr_info("Building docs completed")
     
-    _run_command(c, f'bash tools/create_deb.sh cdkerror {version_value} {current_revision} "{description_value}"')
+@task
+def docs_serve(c, port=8000):
+    _pr_info("Serving docs...")
+
+    c.run(
+        " ".join(
+            [
+                f"sphinx-autobuild",
+                f"--port {port}",
+                f"docs build/docs/html",
+            ]
+        ),
+        pty=True,
+    )
+
+    _pr_info("Serving docs completed")
+
+# @task
+# def deb(c):
+#     """ Build deb package.
+#     """
+#     current_revision = 1
+#     version_re = re.compile(r"version : '(\S+)'")
+#     version_value = None
+#     description_re = re.compile(r"project_description = '(.+)'")
+#     description_value = None
+    
+#     with open("meson.build") as fp:
+#         meson = fp.readlines()
+
+    
+#     for line in meson:
+#         version_match = version_re.search(line)
+        
+#         if version_match:
+#             version_value = version_match[1]
+            
+#         description_match = description_re.search(line)
+        
+#         if description_match:
+#             description_value = description_match[1]
+
+#     if not version_value or not description_value:
+#         raise ValueError(f"No version or description: {version_value=} {description_value=}")
+    
+#     _run_command(c, f'bash tools/create_deb.sh cdkerror {version_value} {current_revision} "{description_value}"')
+
+
     
 ######################################################################################
 #                                  Private API                                       #
@@ -267,3 +316,20 @@ def _pr_debug(message: str):
 
 def _pr_error(message: str):
     print(f"\033[91m[ERROR] {message}\033[0m")
+
+def _find_docs_assets(path, results=None):
+    if results is None:
+        results = []
+
+    if not os.path.isdir(path):
+        return results
+
+    for nested_path in os.listdir(path):
+        rel_nested_path = os.path.join(path, nested_path)
+        if os.path.basename(path) == "assets":
+            results.append(rel_nested_path)
+        if os.path.isdir(rel_nested_path):
+            _find_docs_assets(rel_nested_path, results)
+
+    return results
+    
