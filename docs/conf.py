@@ -2,7 +2,7 @@ import os
 import sys
 
 # -- Project information -------------------------------------------------------
-project = 'Open Source eBook Reader'
+project = 'C Development Kit: GPIO'
 author = 'Jakub Buczynski <KubaTaba1uga>'
 
 # -- General configuration -----------------------------------------------------
@@ -35,12 +35,12 @@ html_theme_options = {
 html_context = {
     "display_github": True,
     "github_user": "KubaTaba1uga",
-    "github_repo": "open_source_ebook_reader",
+    "github_repo": "cdk_gpio",
     "github_version": "main",
     "conf_py_path": "/docs/",
 }
 
-html_short_title = "eBook Reader"
+html_short_title = "CDK: GPIO"
 pygments_style = "monokai"
 pygments_dark_style = "monokai"
 

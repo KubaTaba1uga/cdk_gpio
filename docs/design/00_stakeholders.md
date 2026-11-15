@@ -8,7 +8,7 @@ The following stakeholder have been identified:
 
 ## IT8951 driver developers
 
-**ID**: <a id="STAKE-IT8951"></a>STAKE-IT8951
+**ID**: STAKE-IT8951
 
 The IT8951 driver needs to work across multiple boards, like raspberry pi or seed studio odyssey
 without changing the source code.
@@ -24,6 +24,8 @@ We specify goals and objectives based on the stakeholder excpectation.
 
 ### Change GPIO mapping without changing sources
 
+**Related Excpectations**: EXP-00
+
 Provide a mechanism of changing GPIO mapping without changing sources.
 
 | ID     | Objective                                        |
@@ -34,6 +36,8 @@ Provide a mechanism of changing GPIO mapping without changing sources.
 | OBJ-03 | If no mapping provided default is used.          |
 
 ### Use GPIO in easy way
+
+**Related Excpectations**: EXP-01
 
 Provide simple API to use GPIO.
 
