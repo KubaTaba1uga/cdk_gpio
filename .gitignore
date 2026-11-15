@@ -1,0 +1,16 @@
+*.o*
+*.mod*
+*.ko*
+*.order*
+*.symvers*
+*~*
+*#*
+bkp/*
+.cache/*
+build/*
+error_dump.txt
+**/.cache
+**/build
+*.txt
+subprojects/unity
+subprojects/c_minilib_error
