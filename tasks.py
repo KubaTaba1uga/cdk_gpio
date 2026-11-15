@@ -28,8 +28,9 @@ DOCS_PATH = os.path.join(ROOT_PATH, "docs")
 os.environ["PATH"] = f"{os.path.join(ROOT_PATH, '.venv', 'bin')}:{os.environ['PATH']}"
 os.chdir(ROOT_PATH)
 
+
 @task
-def install(c):
+def deps_install(c):
     """
     Install dependencies if they are not already installed.
 
@@ -42,7 +43,7 @@ def install(c):
         C_COMPILER: C_COMPILER,
         C_FORMATTER: C_FORMATTER,
         C_LINTTER: C_LINTTER,
-        "j2": "j2cli"
+        "j2": "j2cli",
     }
     _pr_info("Installing dependencies...")
 
@@ -57,7 +58,7 @@ def install(c):
 
 
 @task
-def build(c, debug=False, tests=False):
+def build(c, debug=False, tests=False, install_dir="/usr/"):
     """
     Configure and build the project.
 
@@ -68,7 +69,7 @@ def build(c, debug=False, tests=False):
 
     _run_command(c, f"mkdir -p {BUILD_PATH}")
 
-    setup_command = f"CC={C_COMPILER} meson setup {BUILD_PATH}"
+    setup_command = f"CC={C_COMPILER} meson setup --prefix={install_dir} {BUILD_PATH}"
 
     if debug:
         setup_command = f"{setup_command} -Db_sanitize=address,undefined -Db_lundef=false -Dbuildtype=debug"
@@ -82,6 +83,16 @@ def build(c, debug=False, tests=False):
     _run_command(c, f"meson compile -v -C {BUILD_PATH}")
 
     _pr_info("Build done")
+
+
+@task
+def install(c):
+    _run_command(c, f"sudo meson install -C {BUILD_PATH}")
+
+
+@task
+def uninstall(c):
+    _run_command(c, f"sudo ninja uninstall -C {BUILD_PATH}")
 
 
 @task(iterable=["name"])
@@ -183,7 +194,8 @@ def clean(c, extra=""):
                 print(f"Removed directory {path}")
 
     _pr_info("Clean up completed.")
-    
+
+
 @task
 def docs_build(c):
     _pr_info("Building docs...")
@@ -191,7 +203,7 @@ def docs_build(c):
     docs_path = os.path.join(BUILD_PATH, "docs", "html")
     assets_paths = _find_docs_assets(os.path.join(ROOT_PATH, "docs"))
     drawio_paths = [path for path in assets_paths if path.endswith(".drawio")]
-    
+
     for drawio_path in drawio_paths:
         print(f"{drawio_path=}")
         do_loop, i = True, 1
@@ -200,7 +212,7 @@ def docs_build(c):
             if not res.ok:
                 do_loop = False
             i += 1
-            
+
     try:
         c.run("doxygen docs/Doxyfile")
         with c.cd(DOCS_PATH):
@@ -210,7 +222,8 @@ def docs_build(c):
         raise
 
     _pr_info("Building docs completed")
-    
+
+
 @task
 def docs_serve(c, port=8000):
     _pr_info("Serving docs...")
@@ -228,6 +241,7 @@ def docs_serve(c, port=8000):
 
     _pr_info("Serving docs completed")
 
+
 # @task
 # def deb(c):
 #     """ Build deb package.
@@ -237,29 +251,28 @@ def docs_serve(c, port=8000):
 #     version_value = None
 #     description_re = re.compile(r"project_description = '(.+)'")
 #     description_value = None
-    
+
 #     with open("meson.build") as fp:
 #         meson = fp.readlines()
 
-    
+
 #     for line in meson:
 #         version_match = version_re.search(line)
-        
+
 #         if version_match:
 #             version_value = version_match[1]
-            
+
 #         description_match = description_re.search(line)
-        
+
 #         if description_match:
 #             description_value = description_match[1]
 
 #     if not version_value or not description_value:
 #         raise ValueError(f"No version or description: {version_value=} {description_value=}")
-    
+
 #     _run_command(c, f'bash tools/create_deb.sh cdkerror {version_value} {current_revision} "{description_value}"')
 
 
-    
 ######################################################################################
 #                                  Private API                                       #
 ######################################################################################
@@ -317,6 +330,7 @@ def _pr_debug(message: str):
 def _pr_error(message: str):
     print(f"\033[91m[ERROR] {message}\033[0m")
 
+
 def _find_docs_assets(path, results=None):
     if results is None:
         results = []
@@ -332,4 +346,3 @@ def _find_docs_assets(path, results=None):
             _find_docs_assets(rel_nested_path, results)
 
     return results
-    
